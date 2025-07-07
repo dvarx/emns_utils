@@ -266,6 +266,24 @@ class magnetic_system:
             
         return (Bs,coordinates)
 
+def compute_bfi_matrix(system,Bs,Fs,Bdir,Fdir,printres=False):
+    Apos=system.getA((0,0,0),Bdir)
+    Aneg=system.getA((0,0,0),-Bdir)
+    Ainv=pinv(Apos)
+    Ainvneg=pinv(Aneg)
+    imaxs=np.zeros((len(Bs),len(Fs)))
+    for i in range(0,len(Fs)):
+        for j in range(0,len(Bs)):
+            F=Fs[i]*Fdir
+            B=Bs[j]*Bdir
+            if Bs[j]>=0:
+                imaxs[i,j]=max(abs(Ainv.dot(np.append(B,F))))
+            else:
+                imaxs[i,j]=max(abs(Ainvneg.dot(np.append(B,F))))
+            # if(printres and imaxs[i,j]<10 and abs(Fs[j])>0.5):
+            #     print("B: %.2f F: %.2f imax: %.2f"%(1e3*Bs[i],Fs[j],imaxs[i,j]))
+    return imaxs
+
 if __name__=="__main__":
     Ncoils=3
     system=magnetic_system(str("config/7x7x5_40mm_40mm_30mm_steelcores_threecoil/calibration.pkl"),"pickle",7,7,7,Ncoils)
