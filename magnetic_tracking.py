@@ -56,6 +56,16 @@ def getvoltphasormat(data,ks,compute_ref_sensor=False):
     else:
         return voltmat
 
+#solved the optimization problem R=argmin_{R' in SO(3)} [R'B1-B2]_{F2}
+def findrotmat(phasormat1,phasormat2,method="Inverse"):
+    if method=="Inverse":
+        rotmat=phasormat2.dot(pinv(phasormat1))
+    if method=="Procrustes":
+        U,S,Vt=svd(np.real(phasormat1.dot(phasormat2.transpose().conj())))
+        d=det(U.dot(Vt))
+        rotmat=Vt.transpose().dot(np.diag([1,1,d]).dot(U.transpose()))
+    return rotmat
+
 class pickup_coils:
     def __init__(self,sigpowercalfilename,phasorcalfilename,ks):
         self.ks=ks
