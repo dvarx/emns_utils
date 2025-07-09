@@ -6,6 +6,7 @@ import numpy as np
 from scipy.fftpack import fft
 import pickle as pkl
 from numpy.linalg import pinv,norm,svd,det
+import matplotlib.pyplot as plt
 
 #apply a window function to the sampled data and compute its power DFT samples[frameno,sampleno,channelno] or samples[sampleno,channelno]
 def extract_windowed_pdft(samples,window):
@@ -65,6 +66,82 @@ def findrotmat(phasormat1,phasormat2,method="Inverse"):
         d=det(U.dot(Vt))
         rotmat=Vt.transpose().dot(np.diag([1,1,d]).dot(U.transpose()))
     return rotmat
+
+def plot_dataframe_dft(dataframe,N=5000):
+    fig1=plt.figure()
+    plt.subplot(211)
+    plt.plot(dataframe[:,0],color="red",alpha=0.5)
+    plt.plot(dataframe[:,1],color="green",alpha=0.5)
+    plt.plot(dataframe[:,2],color="blue",alpha=0.5)
+    plt.plot(dataframe[:,3],color="gray",alpha=0.5)
+    #plt.plot(data[:,3],color="gray")
+    plt.xlabel("Sample No")
+    plt.ylabel("Voltage [V]")
+    plt.ylim([-5,5])
+    plt.subplot(212)
+    plt.plot(dataframe[:,0],color="red",alpha=0.5)
+    plt.plot(dataframe[:,1],color="green",alpha=0.5)
+    plt.plot(dataframe[:,2],color="blue",alpha=0.5)
+    plt.plot(dataframe[:,3],color="gray",alpha=0.5)
+    #plt.plot(data[:,3],color="gray")
+    plt.xlabel("Sample No")
+    plt.ylabel("Voltage [V]")
+    plt.xlim([500,1000])
+    plt.ylim([-5,5])
+
+    yticks=[10**(-n) for n in range(0,8)]
+    data_dft=extract_windowed_pdft(dataframe,"blackman")
+
+    fig2=plt.figure()
+    df=50
+    plt.subplot(411)
+    plt.semilogy(1e-3*df*np.arange(0,N),np.abs(data_dft[:,0]),color="red")
+    plt.grid()
+    plt.xlim([0,50])
+    plt.yticks(yticks)
+    plt.ylim([1e-7,1e-1])
+    plt.ylabel("$V_x$   [V/$\sqrt{Hz}$]")
+    plt.subplot(412)
+    plt.semilogy(1e-3*df*np.arange(0,N),np.abs(data_dft[:,1]),color="green")
+    plt.grid()
+    plt.xlim([0,50])
+    plt.yticks(yticks)
+    plt.ylim([1e-7,1e-1])
+    plt.ylabel("$V_y$   [V/$\sqrt{Hz}$]")
+    plt.subplot(413)
+    plt.semilogy(1e-3*df*np.arange(0,N),np.abs(data_dft[:,2]),color="blue")
+    plt.grid()
+    plt.xlim([0,50])
+    plt.yticks(yticks)
+    plt.ylim([1e-7,1e-1])
+    plt.ylabel("$V_z$   [V/$\sqrt{Hz}$]")
+    plt.subplot(414)
+    plt.semilogy(1e-3*df*np.arange(0,N),np.abs(data_dft[:,3]),color="gray")
+    plt.grid()
+    plt.xlim([0,50])
+    plt.yticks(yticks)
+    plt.ylim([1e-7,1e-1])
+    plt.ylabel("$V_{ref}$   [V/$\sqrt{Hz}$]")
+    plt.xlabel("Frequency [kHz]")
+    # plt.subplot(414)
+    # plt.semilogy(np.abs(data_dft[:,3]),color="gray")
+    # plt.yticks(yticks)
+    
+    return (fig1,fig2)
+
+def plot_phasors(data_dft,ks):
+    #phasor scatter plot
+    for k in ks:
+        plt.figure()
+        plt.scatter(np.real(data_dft[:,k,0]),np.imag(data_dft[:,k,0]))
+        plt.scatter(np.real(data_dft[:,k,1]),np.imag(data_dft[:,k,1]))
+        plt.scatter(np.real(data_dft[:,k,2]),np.imag(data_dft[:,k,2]))
+        plt.axis('equal')
+        plt.xlabel("Real")
+        plt.ylabel("Imaginary")
+        plt.title("Phasor at k=%d"%(k))
+        plt.show()
+
 
 class pickup_coils:
     def __init__(self,sigpowercalfilename,phasorcalfilename,ks):
