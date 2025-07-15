@@ -179,8 +179,11 @@ class pickup_coils:
     def getphasorsensmats(self):
         return self.phasorsensmats
     
-    def getsignalpowers(self,voltphasormat):
+    def getsignalpowers(self,voltphasormat,use_phasormat=True):
         #fieldphasormat[channelno,freqno]
+        if use_phasormat:
+            phasormat=self.getphasormat(voltphasormat)
+            return norm(phasormat,axis=0)
         fieldphasormat=np.zeros((3,3),dtype="complex128")
         fieldphasormat[:,0]=self.invpowsensmats[0,:,:].dot(voltphasormat[:,0])
         fieldphasormat[:,1]=self.invpowsensmats[1,:,:].dot(voltphasormat[:,1])
