@@ -143,6 +143,9 @@ def plot_phasors(data_dft,ks):
         plt.show()
 
 
+def getbphasormat(voltphasormat,invsensmats):
+    return np.array([invsensmats[freqno,:,:].dot(voltphasormat[:,freqno]) for freqno in range(0,3)]).transpose()
+
 class pickup_coils:
     def __init__(self,sigpowercalfilename,phasorcalfilename,ks):
         self.ks=ks
@@ -174,7 +177,7 @@ class pickup_coils:
         return getvoltphasormat(data,self.ks)
         
     def getphasormat(self,voltphasormat):
-        return np.array([self.invphasorsensmats[freqno,:,:].dot(voltphasormat[:,freqno]) for freqno in range(0,3)]).transpose()
+        return getbphasormat(voltphasormat,self.invphasorsensmats)
     
     def getphasorsensmats(self):
         return self.phasorsensmats
